@@ -132,7 +132,8 @@ minetest.register_chatcommand("forbidden_names_reload", {
 
 minetest.register_on_prejoinplayer(function(name, ip)
 	local lname = name:lower()
-	for iname, data in pairs(minetest.auth_table) do
+	local enumerate = minetest.get_auth_handler().enumerate_auths
+	for iname, data in enumerate and enumerate() or pairs(minetest.auth_table) do
 		if iname:lower() == lname and iname ~= name then
 			return "Sorry, someone else is already using this"
 				.." name.  Please pick another name."
@@ -150,9 +151,15 @@ minetest.register_chatcommand("choosecase", {
 	func = function(name, params)
 		local lname = params:lower()
 		local worldpath = minetest.get_worldpath()
-		for iname, data in pairs(minetest.auth_table) do
+		local enumerate = minetest.get_auth_handler().enumerate_auths
+		for iname, data in enumerate and enumerate() or pairs(minetest.auth_table) do
 			if iname:lower() == lname and iname ~= params then
-				minetest.auth_table[iname] = nil
+				local delete = minetest.get_auth_handler().delete_auth
+				if delete then
+					delete(iname)
+				else
+					minetest.auth_table[iname] = nil
+				end
 				assert(not iname:find("[/\\]"))
 				os.remove(worldpath .. "/players/" .. iname)
 			end
@@ -211,7 +218,8 @@ minetest.register_on_prejoinplayer(function(name, ip)
 	local re = name:gsub(all_chars, char_map)
 	re = "^[_-]*" .. re .. "[_-]*$"
 
-	for authName, _ in pairs(minetest.auth_table) do
+	local enumerate = minetest.get_auth_handler().enumerate_auths
+	for authName, _ in enumerate and enumerate() or pairs(minetest.auth_table) do
 		if authName ~= name and authName:match(re) then
 			return "Your name is too similar to another player's name."
 		end
