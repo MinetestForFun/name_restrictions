@@ -132,8 +132,9 @@ minetest.register_chatcommand("forbidden_names_reload", {
 
 minetest.register_on_prejoinplayer(function(name, ip)
 	local lname = name:lower()
-	local enumerate = minetest.get_auth_handler().enumerate_auths
-	for iname, data in enumerate and enumerate() or pairs(minetest.auth_table) do
+	local enumerate, e1, e2, e3 = minetest.get_auth_handler().enumerate_auths
+	if enumerate then e1 = enumerate() else e1, e2, e3 = pairs(minetest.auth_table) end
+	for iname, data in e1, e2, e3 do
 		if iname:lower() == lname and iname ~= name then
 			return "Sorry, someone else is already using this"
 				.." name.  Please pick another name."
@@ -151,8 +152,9 @@ minetest.register_chatcommand("choosecase", {
 	func = function(name, params)
 		local lname = params:lower()
 		local worldpath = minetest.get_worldpath()
-		local enumerate = minetest.get_auth_handler().enumerate_auths
-		for iname, data in enumerate and enumerate() or pairs(minetest.auth_table) do
+		local enumerate, e1, e2, e3 = minetest.get_auth_handler().enumerate_auths
+		if enumerate then e1 = enumerate() else e1, e2, e3 = pairs(minetest.auth_table) end
+		for iname, data in e1, e2, e3 do
 			if iname:lower() == lname and iname ~= params then
 				local delete = minetest.get_auth_handler().delete_auth
 				if delete then
@@ -218,8 +220,9 @@ minetest.register_on_prejoinplayer(function(name, ip)
 	local re = name:gsub(all_chars, char_map)
 	re = "^[_-]*" .. re .. "[_-]*$"
 
-	local enumerate = minetest.get_auth_handler().enumerate_auths
-	for authName, _ in enumerate and enumerate() or pairs(minetest.auth_table) do
+	local enumerate, e1, e2, e3 = minetest.get_auth_handler().enumerate_auths
+	if enumerate then e1 = enumerate() else e1, e2, e3 = pairs(minetest.auth_table) end
+	for authName, _ in e1, e2, e3 do
 		if authName ~= name and authName:match(re) then
 			return "Your name is too similar to another player's name."
 		end
