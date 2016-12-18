@@ -90,17 +90,6 @@ do
 	end
 end
 
-minetest.register_on_prejoinplayer(function(name, ip)
-	local lname = name:lower()
-	for re, reason in pairs(disallowed) do
-		if lname:find(re) then
-			return reason
-		end
-	end
-	if disallowed_names[lname] then
-		return "Sorry. This name is forbidden."
-	end
-end)
 
 --------------------------------------
 -- Simple matching config reloading --
@@ -129,20 +118,6 @@ minetest.register_chatcommand("forbidden_names_reload", {
 ------------------------
 -- Case-insensitivity --
 ------------------------
-
-minetest.register_on_prejoinplayer(function(name, ip)
-	local lname = name:lower()
-	local enumerate, e1, e2, e3 = minetest.get_auth_handler().enumerate_auths
-	if enumerate then e1 = enumerate() else e1, e2, e3 = pairs(minetest.auth_table) end
-	for iname, data in e1, e2, e3 do
-		if iname:lower() == lname and iname ~= name then
-			return "Sorry, someone else is already using this"
-				.." name.  Please pick another name."
-				.."  Another possibility is that you used the"
-				.." wrong case for your name."
-		end
-	end
-end)
 
 -- Compatability, for old servers with conflicting players
 minetest.register_chatcommand("choosecase", {
@@ -214,6 +189,31 @@ all_chars = all_chars .. "]"
 
 
 minetest.register_on_prejoinplayer(function(name, ip)
+	--MFF crabman (fix new player disallow old player with similaire name)
+	local exists = minetest.get_auth_handler().get_auth(name)
+	if exists then return end
+
+	local lname = name:lower()
+	for re, reason in pairs(disallowed) do
+		if lname:find(re) then
+			return reason
+		end
+	end
+	if disallowed_names[lname] then
+		return "Sorry. This name is forbidden."
+	end
+
+	local enumerate, e1, e2, e3 = minetest.get_auth_handler().enumerate_auths
+	if enumerate then e1 = enumerate() else e1, e2, e3 = pairs(minetest.auth_table) end
+	for iname, data in e1, e2, e3 do
+		if iname:lower() == lname and iname ~= name then
+			return "Sorry, someone else is already using this"
+				.." name.  Please pick another name."
+				.."  Another possibility is that you used the"
+				.." wrong case for your name."
+		end
+	end
+
 	if exemptions[name] then return end
 
 	-- Generate a regular expression to match all similar names
