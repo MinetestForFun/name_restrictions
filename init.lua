@@ -7,21 +7,21 @@
 -- For legitimate player names that are caught by the filters.
 
 local exemptions = {}
-local temp = minetest.setting_get("name_restrictions.exemptions")
+local temp = minetest.settings:get("name_restrictions.exemptions")
 temp = temp and temp:split() or {}
 for _, allowed_name in pairs(temp) do
 	exemptions[allowed_name] = true
 end
 temp = nil
 -- Exempt server owner
-exemptions[minetest.setting_get("name")] = true
+exemptions[minetest.settings:get("name")] = true
 exemptions["singleplayer"] = true
 
 local disallowed_names
 
 local function load_forbidden_names()
 	disallowed_names = {}
-	local path = minetest.setting_get("name_restrictions.forbidden_names_list_path") or
+	local path = minetest.settings:get("name_restrictions.forbidden_names_list_path") or
 		minetest.get_worldpath("name_restrictions") .. "/forbidden_names.txt"
 	local file = io.open(path, 'r')
 	if file then
@@ -53,7 +53,7 @@ end
 local disallowed
 
 local function load_disallowed()
-	local path = minetest.setting_get("name_restrictions.forbidden_name_patterns_list_path") or
+	local path = minetest.settings:get("name_restrictions.forbidden_name_patterns_list_path") or
 		minetest.get_worldpath("name_restrictions") .. "/forbidden_names_patterns.txt"
 	local file = io.open(path, 'r')
 	if file then
@@ -235,8 +235,8 @@ end)
 -- Name length --
 -----------------
 
-local min_name_len = tonumber(minetest.setting_get("name_restrictions.minimum_name_length")) or 2
-local max_name_len = tonumber(minetest.setting_get("name_restrictions.maximum_name_length")) or 17
+local min_name_len = tonumber(minetest.settings:get("name_restrictions.minimum_name_length")) or 2
+local max_name_len = tonumber(minetest.settings:get("name_restrictions.maximum_name_length")) or 17
 
 minetest.register_on_prejoinplayer(function(name, ip)
 	if exemptions[name] then return end
@@ -307,7 +307,7 @@ end
 --   0.5 = Strict checking.
 --   1   = Normal checking.
 --   2   = Relaxed checking.
-local pronounceability = tonumber(minetest.setting_get("name_restrictions.pronounceability"))
+local pronounceability = tonumber(minetest.settings:get("name_restrictions.pronounceability"))
 if pronounceability then
 	minetest.register_on_prejoinplayer(function(name, ip)
 		if exemptions[name] then return end
@@ -318,4 +318,3 @@ if pronounceability then
 		end
 	end)
 end
-
